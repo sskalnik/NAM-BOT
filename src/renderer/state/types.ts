@@ -1,0 +1,42 @@
+export {
+  DEFAULT_PRESET_ID,
+  LEGACY_LSTM_PRESET_ID,
+  NAM_GEAR_TYPE_OPTIONS,
+  NAM_TONE_TYPE_OPTIONS,
+  builtInTrainingPresets,
+  buildLstmConfig,
+  buildNamMetadataPatch,
+  buildWaveNetConfig,
+  createImportedPreset,
+  createTrainingPreset,
+  defaultJobSpec,
+  getBuiltInPreset,
+  normalizeJobSpec,
+  normalizeNamMetadata,
+  normalizeTrainingPreset,
+  slugifyPresetName
+} from '../../shared/training'
+
+export type {
+  ArchitectureSize,
+  ImportedPresetResult,
+  JobCheckpointSummary,
+  JobDeviceSummary,
+  JobLogSummary,
+  JobRuntimeState,
+  JobSpec,
+  JobStatus,
+  JobStopMode,
+  JobTerminalProgress,
+  JobTrainingOverrides,
+  ModelFamily,
+  NamEmbeddedMetadata,
+  NamGearType,
+  NamToneType,
+  PresetCategory,
+  TrainingPresetAuthor,
+  TrainingPresetExpertBlocks,
+  TrainingPresetFile,
+  TrainingPresetOrigin,
+  TrainingPresetValues
+} from '../../shared/training'

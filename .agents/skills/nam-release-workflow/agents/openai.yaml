@@ -1,0 +1,4 @@
+interface:
+  display_name: "NAM Release Workflow"
+  short_description: "Project release and version bump workflow"
+  default_prompt: "Use $nam-release-workflow to prepare a release in this repository."

@@ -1,0 +1,23 @@
+export type AppRoute =
+  | '/'
+  | '/jobs'
+  | '/presets'
+  | '/settings'
+  | '/diagnostics'
+  | '/help'
+  | '/about'
+
+export interface NavigateAppCommand {
+  type: 'navigate'
+  path: AppRoute
+}
+
+export interface NewJobAppCommand {
+  type: 'new-job'
+}
+
+export interface NewPresetAppCommand {
+  type: 'new-preset'
+}
+
+export type AppCommand = NavigateAppCommand | NewJobAppCommand | NewPresetAppCommand

@@ -1,0 +1,55 @@
+appId: com.nambot.app
+productName: NAM-BOT
+directories:
+  buildResources: build
+  output: release
+files:
+  - out/**/*
+  - node_modules/node-pty/**/*
+  - "!node_modules/node-pty/build/**/*.iobj"
+  - "!node_modules/node-pty/build/**/*.ipdb"
+  - "!node_modules/node-pty/build/**/*.ilk"
+  - "!node_modules/node-pty/build/**/*.pdb"
+  - "!node_modules/node-pty/build/**/*.tlog"
+  - "!node_modules/node-pty/build/**/obj/**/*.obj"
+  - "!node_modules/node-pty/build/**/obj/**/*.lastbuildstate"
+  - "!node_modules/node-pty/build/**/obj/**/*.log"
+  - "!node_modules/node-pty/build/**/obj/**/*.recipe"
+  - "!node_modules/node-pty/build/**/obj/**/*.txt"
+  - "!node_modules/node-pty/src/**/*"
+  - "!node_modules/node-pty/deps/**/*"
+  - "!node_modules/node-pty/vendor/**/*"
+  - "!node_modules/node-pty/scripts/**/*"
+  - "!node_modules/node-pty/.github/**/*"
+  - "!node_modules/node-pty/**/*.md"
+  - "!node_modules/node-pty/**/*.map"
+  - "!node_modules/node-pty/**/*.ts"
+  - "!**/*.map"
+extraMetadata:
+  main: out/main/index.js
+extraResources:
+  - from: resources/v3_0_0.wav
+    to: v3_0_0.wav
+  - from: build/icon.ico
+    to: icon.ico
+  - from: build/icon.png
+    to: icon.png
+win:
+  icon: build/icon.ico
+  target:
+    - target: nsis
+      arch:
+        - x64
+  artifactName: ${productName}-Setup-${version}.${ext}
+mac:
+  icon: build/icon.icns
+  target:
+    - target: dmg
+      arch:
+        - x64
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: NAM-BOT

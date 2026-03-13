@@ -1,0 +1,203 @@
+import { existsSync, mkdirSync, writeFileSync } from 'fs'
+import { join } from 'path'
+import log from 'electron-log/main'
+import {
+  JobSpec,
+  TrainingPresetFile,
+  buildLstmConfig,
+  buildWaveNetConfig
+} from '../types/jobs'
+
+export interface GeneratedConfigPaths {
+  dataConfig: string
+  modelConfig: string
+  learningConfig: string
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
+}
+
+function deepMerge(base: Record<string, unknown>, override: Record<string, unknown>): Record<string, unknown> {
+  const result: Record<string, unknown> = { ...base }
+
+  for (const [key, value] of Object.entries(override)) {
+    if (isRecord(value) && isRecord(result[key])) {
+      result[key] = deepMerge(result[key] as Record<string, unknown>, value)
+      continue
+    }
+    result[key] = value
+  }
+
+  return result
+}
+
+function buildBaseDataConfig(job: JobSpec, preset: TrainingPresetFile): Record<string, unknown> {
+  return {
+    train: {
+      start_seconds: null,
+      stop_seconds: -9.0,
+      ny: preset.values.ny
+    },
+    validation: {
+      start_seconds: -9.0,
+      stop_seconds: null,
+      ny: null
+    },
+    common: {
+      x_path: job.inputAudioPath,
+      y_path: job.outputAudioPath,
+      delay: job.trainingOverrides.latencySamples ?? 0,
+      allow_unequal_lengths: true
+    }
+  }
+}
+
+function buildBaseModelConfig(preset: TrainingPresetFile): Record<string, unknown> {
+  const schedulerGamma = Math.max(0, 1 - preset.values.learningRateDecay)
+
+  if (preset.values.modelFamily === 'LSTM') {
+    const loss: Record<string, unknown> = {
+      val_loss: 'mse',
+      mask_first: 4096,
+      pre_emph_weight: 1.0,
+      pre_emph_coef: 0.85
+    }
+
+    if (preset.values.fitMrstft) {
+      loss.pre_emph_mrstft_weight = 0.0002
+      loss.pre_emph_mrstft_coef = 0.85
+    }
+
+    return {
+      net: {
+        name: 'LSTM',
+        config: buildLstmConfig(preset.values.architectureSize)
+      },
+      loss,
+      optimizer: {
+        lr: preset.values.learningRate
+      },
+      lr_scheduler: {
+        class: 'ExponentialLR',
+        kwargs: {
+          gamma: schedulerGamma
+        }
+      }
+    }
+  }
+
+  const loss: Record<string, unknown> = {
+    val_loss: 'esr'
+  }
+
+  if (preset.values.fitMrstft) {
+    loss.pre_emph_mrstft_weight = 0.0002
+    loss.pre_emph_mrstft_coef = 0.85
+  }
+
+  return {
+    net: {
+      name: 'WaveNet',
+      config: buildWaveNetConfig(preset.values.architectureSize)
+    },
+    loss,
+    optimizer: {
+      lr: preset.values.learningRate
+    },
+    lr_scheduler: {
+      class: 'ExponentialLR',
+      kwargs: {
+        gamma: schedulerGamma
+      }
+    }
+  }
+}
+
+function buildBaseLearningConfig(job: JobSpec, preset: TrainingPresetFile): Record<string, unknown> {
+  return {
+    train_dataloader: {
+      batch_size: preset.values.batchSize,
+      shuffle: true,
+      pin_memory: true,
+      drop_last: true,
+      num_workers: 0
+    },
+    val_dataloader: {},
+    trainer: {
+      accelerator: 'auto',
+      devices: 1,
+      max_epochs: job.trainingOverrides.epochs ?? preset.values.epochs
+    },
+    trainer_fit_kwargs: {}
+  }
+}
+
+export function buildJobConfigs(
+  job: JobSpec,
+  workspaceDir: string,
+  preset: TrainingPresetFile
+): GeneratedConfigPaths {
+  log.info('Building job configs for:', job.id, 'with preset:', preset.id)
+
+  if (!existsSync(workspaceDir)) {
+    mkdirSync(workspaceDir, { recursive: true })
+  }
+
+  const dataConfig = preset.expert.data && isRecord(preset.expert.data)
+    ? deepMerge(buildBaseDataConfig(job, preset), preset.expert.data)
+    : buildBaseDataConfig(job, preset)
+
+  const modelConfig = preset.expert.model && isRecord(preset.expert.model)
+    ? deepMerge(buildBaseModelConfig(preset), preset.expert.model)
+    : buildBaseModelConfig(preset)
+
+  const learningConfig = preset.expert.learning && isRecord(preset.expert.learning)
+    ? deepMerge(buildBaseLearningConfig(job, preset), preset.expert.learning)
+    : buildBaseLearningConfig(job, preset)
+
+  const dataConfigPath = join(workspaceDir, 'data.json')
+  const modelConfigPath = join(workspaceDir, 'model.json')
+  const learningConfigPath = join(workspaceDir, 'learning.json')
+
+  writeFileSync(dataConfigPath, JSON.stringify(dataConfig, null, 2), 'utf-8')
+  writeFileSync(modelConfigPath, JSON.stringify(modelConfig, null, 2), 'utf-8')
+  writeFileSync(learningConfigPath, JSON.stringify(learningConfig, null, 2), 'utf-8')
+
+  log.info('Configs written:', { dataConfigPath, modelConfigPath, learningConfigPath })
+
+  return {
+    dataConfig: dataConfigPath,
+    modelConfig: modelConfigPath,
+    learningConfig: learningConfigPath
+  }
+}
+
+export function validateJobSpec(job: JobSpec): { valid: boolean; errors: string[] } {
+  const errors: string[] = []
+
+  if (!job.inputAudioPath) {
+    errors.push('Input audio path is required')
+  }
+
+  if (!job.outputAudioPath) {
+    errors.push('Output audio path is required')
+  }
+
+  if (!job.outputRootDir) {
+    errors.push('Output root directory is required')
+  }
+
+  if ((job.trainingOverrides.epochs ?? 0) < 1) {
+    errors.push('Epochs must be at least 1')
+  }
+
+  if (!Number.isFinite(job.trainingOverrides.latencySamples ?? 0)) {
+    errors.push('Latency must be a valid number')
+  }
+
+  return {
+    valid: errors.length === 0,
+    errors
+  }
+}

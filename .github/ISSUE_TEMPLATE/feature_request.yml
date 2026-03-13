@@ -1,0 +1,35 @@
+name: Feature request
+description: Suggest an improvement or new feature for NAM-BOT.
+title: "[Feature]: "
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem are you trying to solve?
+      placeholder: I often need to...
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What would you like to see?
+      placeholder: I would like NAM-BOT to add...
+    validations:
+      required: true
+  - type: textarea
+    id: workflow
+    attributes:
+      label: How would this fit into your workflow?
+      placeholder: This would help because...
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      placeholder: Right now I work around this by...
+  - type: textarea
+    id: extra
+    attributes:
+      label: Additional context
+      description: Mockups, screenshots, or references are welcome.
