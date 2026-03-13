@@ -41,9 +41,12 @@ jobs:
       - name: Package Windows app
         run: npx electron-builder --win --config --publish never
 
-      - name: Compress unpacked app
+      - name: Compress portable app
         shell: powershell
-        run: Compress-Archive -Path 'release\win-unpacked\*' -DestinationPath 'release\NAM-BOT-win-unpacked.zip' -Force
+        run: |
+          $releaseVersion = $env:RELEASE_TAG.TrimStart('v')
+          $portableAsset = "release\\NAM-BOT-Portable-$releaseVersion-windows-x64.zip"
+          Compress-Archive -Path 'release\win-unpacked\*' -DestinationPath $portableAsset -Force
 
       - name: Upload release artifacts to workflow run
         uses: actions/upload-artifact@v4
@@ -51,8 +54,7 @@ jobs:
           name: windows-release-artifacts
           path: |
             release/NAM-BOT-Setup-*.exe
-            release/NAM-BOT-Setup-*.exe.blockmap
-            release/NAM-BOT-win-unpacked.zip
+            release/NAM-BOT-Portable-*-windows-x64.zip
           if-no-files-found: error
 
       - name: Create or update GitHub Release
@@ -66,14 +68,24 @@ jobs:
             gh release create $env:RELEASE_TAG --generate-notes
           }
 
+      - name: Remove obsolete blockmap asset from GitHub Release
+        if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: powershell
+        run: |
+          $releaseVersion = $env:RELEASE_TAG.TrimStart('v')
+          $blockMapAsset = "NAM-BOT-Setup-$releaseVersion.exe.blockmap"
+          cmd /c "gh release delete-asset %RELEASE_TAG% $blockMapAsset --yes 1>nul 2>nul"
+
       - name: Upload assets to GitHub Release
         if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: powershell
         run: |
+          $releaseVersion = $env:RELEASE_TAG.TrimStart('v')
           gh release upload $env:RELEASE_TAG `
             release\NAM-BOT-Setup-*.exe `
-            release\NAM-BOT-Setup-*.exe.blockmap `
-            release\NAM-BOT-win-unpacked.zip `
+            release\NAM-BOT-Portable-$releaseVersion-windows-x64.zip `
             --clobber

@@ -55,8 +55,8 @@ NAM-BOT tries to make local training smoother by giving you:
 For a public repository, the typical user-friendly path is:
 
 1. Open the [GitHub Releases page](https://github.com/daveotero/nam-bot/releases).
-2. Download the latest Windows installer.
-3. Run the installer and launch NAM-BOT.
+2. Download either the latest Windows installer or the portable zip.
+3. Run the installer, or unzip the portable build and launch `NAM-BOT.exe`.
 
 Direct links:
 
