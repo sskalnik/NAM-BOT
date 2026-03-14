@@ -47,6 +47,12 @@ This repo includes two GitHub Actions workflows:
 
 The release workflow does not run on every commit push.
 
+Recommended release timing:
+
+1. Push the finished work to `main`.
+2. Run a final smoke test against that `main` commit.
+3. Push the version tag only when you want GitHub to publish that exact commit as a release.
+
 To trigger a real release build, push a version tag such as:
 
 ```bash

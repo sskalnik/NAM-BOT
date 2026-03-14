@@ -57,6 +57,7 @@ npm run package
 - `.github/workflows/ci.yml` runs on every push and pull request and should be treated as the baseline build-health check.
 - `.github/workflows/release.yml` is for distributable Windows releases and should only publish when a Git tag matching `v*` is pushed, for example `v0.2.5`, or when manually triggered with `workflow_dispatch`.
 - When explaining release flow to contributors, spell out that ordinary pushes do **not** create GitHub Releases automatically.
+- Preferred timing: push the finished commit to `main`, do the final smoke test, and only then push the version tag that should publish publicly.
 - Preferred release trigger example:
 
 ```bash

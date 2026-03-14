@@ -66,6 +66,12 @@ This repo also includes GitHub Actions for public distribution:
 - `CI` runs on every push and pull request to make sure `npm run build` still passes
 - `Release` packages the Windows installer and uploads release assets only when a Git tag like `v0.3.1` is pushed, or when the workflow is run manually from GitHub Actions
 
+The practical release flow is:
+
+1. Push the candidate commit to `main`.
+2. Smoke-test that exact commit locally if needed.
+3. Only then push the version tag that should become the public installer release.
+
 ## Setup Overview
 
 When NAM-BOT starts, it looks for Conda on your system `PATH` and assumes the default Conda environment name `nam`.
