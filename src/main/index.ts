@@ -11,6 +11,7 @@ import { getQueueManager } from './jobs/queueManager'
 import type { JobRuntimeState, JobStatus } from './types/jobs'
 import { installApplicationMenu } from './shell/appMenu'
 import { loadSettings } from './persistence/settingsStore'
+import { getUserPresetsPath } from './persistence/presetStore'
 import type { AppCommand } from '../shared/appShell'
 
 log.initialize()
@@ -342,6 +343,13 @@ app.whenReady().then(() => {
         mkdirSync(workspaceRoot, { recursive: true })
       }
       void openPathInShell(workspaceRoot)
+    },
+    openPresetsFolder: () => {
+      const presetsPath = getUserPresetsPath()
+      if (!existsSync(presetsPath)) {
+        mkdirSync(presetsPath, { recursive: true })
+      }
+      void openPathInShell(presetsPath)
     },
     sendAppCommand,
     showAboutDialog: () => {

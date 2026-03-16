@@ -213,7 +213,10 @@ This prevents silent conflicts between the manual controls and the expert JSON.
 
 ### Internal User Preset Storage
 
-User presets are stored as one JSON file per preset in the Electron user data folder:
+User presets are stored as one JSON file per preset in the Electron user data folder.
+
+> [!TIP]
+> You can quickly open this folder from the application's **File** menu by selecting **Open Presets Folder** (Shortcut: `Ctrl+Shift+P`).
 
 - Windows: `%APPDATA%\\NAM-BOT\\presets`
 

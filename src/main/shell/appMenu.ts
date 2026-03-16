@@ -6,6 +6,7 @@ interface AppMenuOptions {
   isDev: boolean
   openLogsFolder: () => void
   openWorkspaceFolder: () => void
+  openPresetsFolder: () => void
   sendAppCommand: (command: AppCommand) => void
   showAboutDialog: () => void
   openProjectSite: () => void
@@ -64,6 +65,11 @@ export function installApplicationMenu(options: AppMenuOptions): void {
           label: 'Open Workspace Folder',
           accelerator: 'CmdOrCtrl+Shift+W',
           click: () => options.openWorkspaceFolder()
+        },
+        {
+          label: 'Open Presets Folder',
+          accelerator: 'CmdOrCtrl+Shift+P',
+          click: () => options.openPresetsFolder()
         },
         { type: 'separator' },
         process.platform === 'darwin' ? { role: 'close' } : { role: 'quit' }

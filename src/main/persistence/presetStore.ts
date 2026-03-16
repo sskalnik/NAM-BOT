@@ -12,6 +12,10 @@ import {
 } from '../types/jobs'
 
 const userPresetsPath = join(app.getPath('userData'), 'presets')
+
+export function getUserPresetsPath(): string {
+  return userPresetsPath
+}
 const epochRunnerRewardPresetId = 'epoch-runner-reward'
 const epochRunnerRewardPresetName = 'Converged Night Run'
 
