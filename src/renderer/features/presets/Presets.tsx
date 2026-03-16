@@ -416,6 +416,10 @@ function mergeImportedTechnicalFields(basePreset: TrainingPresetFile, importedPr
   })
 }
 
+function prettyJson(value: Record<string, unknown> | undefined): string {
+  return value ? JSON.stringify(value, null, 2) : ''
+}
+
 function formatJsonString(value: string): string {
   const trimmed = value.trim()
   if (!trimmed) {

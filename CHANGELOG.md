@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.3] - 2026-03-16
+
+### Fixed
+
+- Preset editor raw JSON import so `Import Into Editor` now applies validated JSON back into the manual editor instead of silently failing
+
 ## [0.3.2] - 2026-03-16
 
 ### Added
