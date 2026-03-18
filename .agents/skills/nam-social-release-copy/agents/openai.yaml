@@ -1,0 +1,4 @@
+interface:
+  display_name: "NAM Social Release Copy"
+  short_description: "Draft short release and social announcement posts"
+  default_prompt: "Use $nam-social-release-copy to draft four concise NAM-BOT release announcement variants from the last announced version to the current one."

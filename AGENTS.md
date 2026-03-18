@@ -12,6 +12,7 @@ This document provides guidance for AI agents working on the NAM-BOT project.
 ### 0.1 Project-Local Agent Skills
 
 - Project-local agent workflow files live under `.agents/`.
+- Prefix repo-scoped skill names with `nam-` so they stay easy to distinguish from global skills.
 - Use `.agents/skills/nam-release-workflow/SKILL.md` when the user asks to update the changelog, choose a version bump, clean generated release trash, commit, or push.
 
 ### 0.2 Documentation Discipline
@@ -56,10 +57,12 @@ npm run package
 
 - `.github/workflows/ci.yml` runs on every push and pull request and should be treated as the baseline build-health check.
 - `.github/workflows/release.yml` is for distributable Windows releases and should only publish when a Git tag matching `v*` is pushed, for example `v0.2.5`, or when manually triggered with `workflow_dispatch`.
+- `.github/workflows/release-macos.yml` is for manual macOS beta asset uploads. It should be run by a maintainer against an existing release tag when macOS builds are ready to attach.
 - When explaining release flow to contributors, spell out that ordinary pushes do **not** create GitHub Releases automatically.
 - Preferred timing: push the finished commit to `main`, do the final smoke test, and only then push the version tag that should publish publicly.
 - When an agent pushes `main` for release work, it should always mention whether a matching version tag should also be pushed for a full GitHub release.
 - Agents must never push a release tag automatically without an explicit user confirmation in that thread, even when the version bump and release commit are already prepared.
+- Windows release tags publish the Windows installer and portable ZIP; macOS beta assets are attached later by the manual macOS workflow.
 - Preferred release trigger example:
 
 ```bash

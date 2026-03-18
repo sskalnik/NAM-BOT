@@ -16,6 +16,8 @@ Use this skill to turn the current thread's completed repo changes into a clean 
 - Treat pushing `main` and pushing a release tag as separate decisions.
 - Always mention the matching version tag when reporting or proposing a release push to `main`.
 - Never push a version tag unless the user explicitly asks for it or explicitly confirms it in that thread.
+- `release.yml` publishes the Windows release assets from `v*` tags.
+- `release-macos.yml` is a separate manual workflow for attaching macOS beta assets to an existing tag.
 
 ## Required Files
 
@@ -38,6 +40,7 @@ Use this skill to turn the current thread's completed repo changes into a clean 
 9. Commit with a direct release-oriented message.
 10. Push `main`. When reporting the push, explicitly mention whether the matching version tag has not been pushed yet and that pushing the tag is what triggers the public GitHub release. If the push is rejected because remote moved, rebase onto `origin/main`, resolve conflicts, rebuild if the rebase touched code, then push again.
 11. Only if the user explicitly asks for the full release tag push, create and push the matching `v<version>` tag.
+12. If macOS beta assets are ready, run the manual macOS workflow against the already-published tag rather than creating a second tag.
 
 ## Changelog Notes
 
