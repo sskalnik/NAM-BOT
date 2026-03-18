@@ -47,7 +47,7 @@ jobs:
         shell: powershell
         run: |
           $releaseVersion = $env:RELEASE_TAG.TrimStart('v')
-          $portableAsset = "release\\NAM-BOT-Portable-$releaseVersion-windows-x64.zip"
+          $portableAsset = "release\\NAM-BOT-Portable-$releaseVersion-Win64.zip"
           Compress-Archive -Path 'release\win-unpacked\*' -DestinationPath $portableAsset -Force
 
       - name: Upload release artifacts to workflow run
@@ -56,7 +56,7 @@ jobs:
           name: windows-release-artifacts
           path: |
             release/NAM-BOT-Setup-*.exe
-            release/NAM-BOT-Portable-*-windows-x64.zip
+            release/NAM-BOT-Portable-*-Win64.zip
           if-no-files-found: error
 
       - name: Create or update GitHub Release
@@ -79,5 +79,5 @@ jobs:
           $releaseVersion = $env:RELEASE_TAG.TrimStart('v')
           gh release upload $env:RELEASE_TAG `
             release\NAM-BOT-Setup-*.exe `
-            release\NAM-BOT-Portable-$releaseVersion-windows-x64.zip `
+            release\NAM-BOT-Portable-$releaseVersion-Win64.zip `
             --clobber
