@@ -69,7 +69,7 @@ For a public repository, the typical user-friendly path is:
 1. Open the GitHub Releases page.
 2. Download the latest Windows installer if you are on Windows, or the matching `arm64` / `x64` DMG if you are on macOS.
    Windows installer example: `NAM-BOT-Setup-0.4.0-Win64.exe`
-   macOS examples: `NAM-BOT-0.4.0-macOS-arm64.dmg` or `NAM-BOT-0.4.0-macOS-x64.dmg`
+   macOS beta examples: `NAM-BOT-0.4.0-macOS-beta-arm64.dmg` or `NAM-BOT-0.4.0-macOS-beta-x64.dmg`
 3. Run the installer on Windows, or open the DMG and move NAM-BOT into Applications on macOS.
 
 ## Setup Overview
