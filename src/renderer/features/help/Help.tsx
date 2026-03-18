@@ -210,12 +210,23 @@ export default function Help() {
             </p>
           </div>
 
+          <div style={{
+            backgroundColor: 'rgba(0, 243, 255, 0.05)',
+            padding: '12px',
+            borderLeft: '4px solid var(--neon-cyan)',
+            marginBottom: '16px'
+          }}>
+            <p style={{ color: 'var(--text-steel)', margin: 0, fontSize: '14px' }}>
+              <strong>macOS note:</strong> use <strong>Terminal</strong> instead of Command Prompt or PowerShell, expect the Conda command to be <code style={{ color: 'var(--neon-cyan)' }}>conda</code>, and on Apple Silicon the accelerator path is <strong>MPS</strong> rather than CUDA.
+            </p>
+          </div>
+
           <h4 style={{ fontFamily: 'var(--font-arcade)', color: 'var(--neon-cyan)', marginTop: '16px', marginBottom: '8px' }}>
             1. Open Settings
           </h4>
           <ol style={{ color: 'var(--text-steel)', paddingLeft: '20px', marginBottom: '16px' }}>
             <li>Go to <strong>Settings</strong> in the left menu</li>
-            <li>Set the Conda executable path if your setup does not use the default <code style={{ color: 'var(--neon-cyan)' }}>conda.exe</code></li>
+            <li>Set the Conda executable path if your setup does not use the default executable shown in Settings</li>
             <li>Set the backend mode to match how you launch NAM today</li>
             <li>Enter the Conda environment name or environment path that already contains your working NAM install</li>
           </ol>
@@ -281,7 +292,7 @@ export default function Help() {
             Navigate to: <a href="https://www.anaconda.com/download" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--neon-cyan)' }}>https://www.anaconda.com/download</a>
           </p>
           <p style={{ color: 'var(--text-steel)' }}>
-            Install Miniconda and make sure <code style={{ color: 'var(--neon-cyan)' }}>conda.exe</code> is added to your PATH.
+            Install Miniconda and make sure <code style={{ color: 'var(--neon-cyan)' }}>conda</code> is added to your PATH.
           </p>
           <div style={{
             backgroundColor: 'rgba(0, 243, 255, 0.05)',
@@ -294,12 +305,15 @@ export default function Help() {
               If prompted, allow Miniconda to add itself to PATH.
             </p>
           </div>
+          <p style={{ color: 'var(--text-steel)', fontSize: '13px', marginTop: '-4px', marginBottom: '16px' }}>
+            On Apple Silicon, choose the Apple Silicon installer. On macOS beta builds, you may need to right-click the app and choose <strong>Open</strong> on first launch if Gatekeeper warns about an unsigned app.
+          </p>
 
           <h4 style={{ fontFamily: 'var(--font-arcade)', color: 'var(--neon-cyan)', marginTop: '24px', marginBottom: '8px' }}>
             2. Create NAM Environment
           </h4>
           <p style={{ color: 'var(--text-steel)', marginBottom: '16px' }}>
-            Open Command Prompt or PowerShell and run these commands <strong>one at a time</strong>:
+            Open Terminal on macOS, or Command Prompt / PowerShell on Windows, and run these commands <strong>one at a time</strong>:
           </p>
 
           <CopyableCodeBlock
@@ -326,7 +340,7 @@ export default function Help() {
           </h4>
           <ol style={{ color: 'var(--text-steel)', paddingLeft: '20px' }}>
             <li>Go to <strong>Settings</strong></li>
-            <li>Leave the default Conda executable as <code style={{ color: 'var(--neon-cyan)' }}>conda.exe</code> unless your install needs a custom path</li>
+            <li>Leave the default Conda executable unchanged unless your install needs a custom path</li>
             <li>Leave the default environment name as <code style={{ color: 'var(--neon-cyan)' }}>nam</code> unless you intentionally created a different environment</li>
             <li>Choose an output directory</li>
             <li>Click <strong>Save Settings</strong></li>
@@ -337,6 +351,9 @@ export default function Help() {
           </h4>
           <p style={{ color: 'var(--text-steel)' }}>
             NAM-BOT validates the backend automatically on startup. You can always go to <strong>Diagnostics</strong> and click <strong>Re-check</strong> to inspect both backend readiness and GPU visibility.
+          </p>
+          <p style={{ color: 'var(--text-steel)', fontSize: '13px', marginTop: '8px' }}>
+            On Windows, GPU diagnostics mostly focus on CUDA and NVIDIA visibility. On Apple Silicon, the same screen also reports whether PyTorch can see <strong>MPS</strong>.
           </p>
 
           <h4 style={{ fontFamily: 'var(--font-arcade)', color: 'var(--neon-cyan)', marginTop: '24px', marginBottom: '8px' }}>
