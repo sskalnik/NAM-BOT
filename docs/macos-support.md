@@ -62,7 +62,7 @@ npm install
 npm run package:mac
 ```
 
-Output: `release/NAM-BOT-{version}-arm64.dmg` (Apple Silicon) and `release/NAM-BOT-{version}.dmg` (Intel)
+Output: `release/NAM-BOT-{version}-macOS-arm64.dmg` (Apple Silicon) and `release/NAM-BOT-{version}-macOS-x64.dmg` (Intel)
 
 ## Release Policy
 
