@@ -62,6 +62,7 @@ The second panel focuses on torch and hardware visibility.
 The exact meaning depends on the machine:
 
 - Windows + NVIDIA users will mostly care about CUDA visibility.
+- Windows + AMD GPU (RX 7000, RX 9000, PRO W7000 series) users will see ROCm GPU visibility.
 - Apple Silicon users will mostly care about MPS visibility.
 - CPU-only systems may still be healthy if no supported accelerator is expected.
 
@@ -75,6 +76,37 @@ The summary banner collapses the result into one of a few user-facing states:
 - `PROBE FAILED`
 
 This panel is meant to answer "If training runs, will it use the hardware path I expect?"
+
+### AMD ROCm Accelerator Support
+
+NAM-BOT detects AMD GPU acceleration through PyTorch's ROCm support on Windows. When an AMD GPU is properly configured:
+
+- The accelerator panel displays `✓ ROCM GPU READY`
+- The detail message shows "ROCm (AMD) GPU is visible"
+- The HIP version is reported in the extended details
+
+**How ROCm Detection Works**
+
+AMD's ROCm PyTorch builds use HIP (Heterogeneous-Interface for Portability) to map GPU acceleration through PyTorch's existing CUDA API. This means:
+
+- `torch.cuda.is_available()` returns `True` for ROCm builds
+- `torch.cuda.device_count()` accurately reflects AMD GPUs
+- NAM-BOT differentiates AMD from NVIDIA by checking `torch.version.hip`
+
+When `torch.version.hip` has a value (and `torch.version.cuda` is `None`), NAM-BOT displays ROCm-specific messaging rather than CUDA messaging.
+
+**Hardware and OS Support**
+
+- **Windows**: AMD Radeon RX 7000, RX 9000, and PRO W7000 series GPUs via official ROCm wheels
+- **Python Version**: Python 3.12 is strictly required for official Windows ROCm PyTorch wheels
+- **macOS**: ROCm is not supported on macOS (Intel or Apple Silicon). Intel Mac users must use CPU-only training.
+
+**Details Toggle Fields**
+
+The expanded accelerator details include:
+
+- ROCm HIP version (shows the ROCm SDK version when using AMD GPU)
+- All existing CUDA, MPS, and host GPU fields
 
 ### Details Toggle
 

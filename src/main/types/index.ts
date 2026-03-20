@@ -76,6 +76,7 @@ export type AcceleratorDiagnosticsIssue =
   | 'cuda_not_visible'
   | 'cuda_ready'
   | 'mps_ready'
+  | 'rocm_ready'
 
 export interface AcceleratorDiagnosticsSummary {
   checkedAt: string
@@ -90,6 +91,7 @@ export interface AcceleratorDiagnosticsSummary {
   torchImportOk: boolean | null
   torchVersion: string | null
   torchCudaVersion: string | null
+  hipVersion: string | null
   namVersion: string | null
   lightningPackage: string | null
   lightningVersion: string | null

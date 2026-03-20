@@ -34,6 +34,7 @@ interface AcceleratorProbePayload {
   torchImportOk: boolean | null
   torchVersion: string | null
   torchCudaVersion: string | null
+  hipVersion: string | null
   cudaAvailable: boolean | null
   cudaDeviceCount: number | null
   deviceName: string | null
@@ -798,6 +799,7 @@ export async function inspectAcceleratorDiagnostics(
     "  'torchImportOk': None,",
     "  'torchVersion': None,",
     "  'torchCudaVersion': None,",
+    "  'hipVersion': None,",
     "  'cudaAvailable': None,",
     "  'cudaDeviceCount': None,",
     "  'deviceName': None,",
@@ -816,6 +818,7 @@ export async function inspectAcceleratorDiagnostics(
     "    payload['torchImportOk'] = True",
     "    payload['torchVersion'] = getattr(torch, '__version__', None)",
     "    payload['torchCudaVersion'] = getattr(getattr(torch, 'version', None), 'cuda', None)",
+    "    payload['hipVersion'] = getattr(getattr(torch, 'version', None), 'hip', None)",
     "    payload['cudaAvailable'] = bool(torch.cuda.is_available())",
     "    payload['cudaDeviceCount'] = int(torch.cuda.device_count())",
     "    payload['deviceName'] = torch.cuda.get_device_name(0) if payload['cudaAvailable'] and payload['cudaDeviceCount'] > 0 else None",
@@ -907,6 +910,7 @@ export async function inspectAcceleratorDiagnostics(
     ...hostNvidia,
     torchVersion: payload.torchVersion ?? null,
     torchCudaVersion: payload.torchCudaVersion ?? null,
+    hipVersion: payload.hipVersion ?? null,
     pythonVersion: payload.pythonVersion ?? null,
     pythonExecutable: payload.pythonExecutable ?? null,
     pythonPlatform: payload.pythonPlatform ?? null,
@@ -959,15 +963,34 @@ export async function inspectAcceleratorDiagnostics(
   }
 
   if (payload.cudaAvailable && (payload.cudaDeviceCount ?? 0) > 0) {
+    const isRocmBuild = payload.hipVersion != null
+
     if (payload.lightningImportOk && payload.lightningCudaAvailable === false) {
       return createAcceleratorDiagnosticsSummary(
         'advisory',
         'lightning_mismatch',
-        'PyTorch sees CUDA, but Lightning did not confirm it',
-        'CUDA is visible to torch, but Lightning did not report the accelerator as available. NAM may still fall back to CPU until that mismatch is resolved.',
+        'PyTorch sees GPU, but Lightning did not confirm it',
+        isRocmBuild
+          ? 'ROCm GPU is visible to torch, but Lightning did not report the accelerator as available. NAM may still fall back to CPU until that mismatch is resolved.'
+          : 'CUDA is visible to torch, but Lightning did not report the accelerator as available. NAM may still fall back to CPU until that mismatch is resolved.',
         {
           ...summaryExtras,
-          suggestion: 'Check for mixed torch / lightning installs in this environment and confirm they were installed against the same CUDA-enabled PyTorch build.'
+          suggestion: 'Check for mixed torch / lightning installs in this environment and confirm they were installed against the same GPU-enabled PyTorch build.'
+        }
+      )
+    }
+
+    if (isRocmBuild) {
+      return createAcceleratorDiagnosticsSummary(
+        'ready',
+        'rocm_ready',
+        'ROCm (AMD) GPU is visible',
+        payload.deviceName
+          ? `PyTorch can see ${payload.deviceName} (ROCm ${payload.hipVersion}), so NAM should be able to request AMD GPU acceleration in this environment.`
+          : `PyTorch reports AMD GPU acceleration with ROCm ${payload.hipVersion} in this environment, so NAM should be able to request GPU acceleration.`,
+        {
+          ...summaryExtras,
+          suggestion: 'If a training run still falls back to CPU, compare this page with the job log to see whether Lightning changes the accelerator decision at runtime.'
         }
       )
     }
@@ -1000,7 +1023,7 @@ export async function inspectAcceleratorDiagnostics(
 
   const isCpuOnlyTorch =
     (payload.torchVersion ?? '').includes('+cpu') ||
-    payload.torchCudaVersion == null
+    (payload.torchCudaVersion == null && payload.hipVersion == null)
 
   if (isCpuOnlyTorch) {
     return createAcceleratorDiagnosticsSummary(

@@ -128,6 +128,65 @@ Expected result:
 
 After that, launch NAM-BOT, fill in `Settings` only if needed, and use `Diagnostics` to confirm the app sees the same backend and GPU state.
 
+### If You Have an AMD GPU (ROCm, Windows Only)
+
+If you have an AMD Radeon GPU (RX 7000, RX 9000, or PRO W7000 series) on Windows, you can use ROCm-enabled PyTorch for GPU-accelerated training. NAM-BOT will automatically detect ROCm and display "ROCm (AMD) GPU is visible" in Diagnostics.
+
+**Requirements:**
+
+- Windows 10 or Windows 11
+- AMD Radeon RX 7000, RX 9000, or PRO W7000 series GPU
+- **Python 3.12** (strictly required for official ROCm wheels)
+- AMD ROCm PyTorch wheels from the official AMD repository
+
+**Setup Steps:**
+
+1. Create a Python 3.12 Conda environment:
+
+```bash
+conda create -n nam python=3.12 -y
+conda activate nam
+```
+
+2. Install the ROCm SDK core package:
+
+```bash
+pip install --no-cache-dir https://repo.radeon.com/rocm/windows/rocm-rel-7.2/rocm_sdk_core-7.2.0.dev0-py3-none-win_amd64.whl
+```
+
+3. Install ROCm-enabled PyTorch:
+
+```bash
+pip install --no-cache-dir https://repo.radeon.com/rocm/windows/rocm-rel-7.2/torch-2.9.1%2Brocmsdk20260116-cp312-cp312-win_amd64.whl
+```
+
+4. Install Neural Amp Modeler:
+
+```bash
+pip install neural-amp-modeler
+```
+
+5. Verify ROCm installation:
+
+```bash
+python -c "import torch; print('CUDA Available:', torch.cuda.is_available()); print('HIP Version:', torch.version.hip)"
+```
+
+Expected result:
+
+- `CUDA Available:` returns `True`
+- `HIP Version:` shows a version string (e.g., `7.2.x`)
+- `torch.version.cuda` is `None` (this is normal for ROCm builds)
+
+**Notes:**
+
+- ROCm PyTorch uses the CUDA API internally via HIP, so `torch.cuda.is_available()` returns `True` even though you have an AMD GPU
+- NAM-BOT detects the difference by checking `torch.version.hip` and displays "ROCm (AMD) GPU is visible" in Diagnostics
+- macOS does not support ROCm; Intel Mac users must use CPU-only training
+- For the latest ROCm versions and compatibility, see the [AMD ROCm documentation](https://rocm.docs.amd.com/projects/radeon-ryzen/en/latest/docs/install/installrad/windows/install-pytorch.html)
+
+After setup, launch NAM-BOT and use `Diagnostics` to confirm "ROCm (AMD) GPU is visible" before training.
+
 ## Diagnostics
 
 The Diagnostics panel is there to do more than just tell you pass or fail.

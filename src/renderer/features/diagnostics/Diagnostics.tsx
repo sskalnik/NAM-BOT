@@ -45,6 +45,7 @@ interface DiagnosticsExportPayload {
     reinstallNam: string
     reinstallTorchCuda: string
     reinstallTorchDefault: string
+    verifyRocm: string
   }
 }
 
@@ -57,6 +58,7 @@ interface DiagnosticCommandSet {
   uninstallTorch: string
   reinstallTorchCuda: string
   reinstallTorchDefault: string
+  verifyRocm: string
 }
 
 function copyText(value: string): void {
@@ -293,7 +295,11 @@ function getDiagnosticCommands(settings: AppSettings | null): DiagnosticCommandS
       settings,
       'install --index-url https://download.pytorch.org/whl/cu130 --no-cache-dir torch==2.10.0+cu130'
     ),
-    reinstallTorchDefault: buildPipCommand(settings, 'install --upgrade torch')
+    reinstallTorchDefault: buildPipCommand(settings, 'install --upgrade torch'),
+    verifyRocm: buildPythonInlineCommand(
+      settings,
+      "import torch; print('CUDA Available:', torch.cuda.is_available()); print('HIP Version:', torch.version.hip if torch.version.hip else 'Not ROCm build')"
+    )
   }
 }
 
@@ -346,6 +352,13 @@ function getAcceleratorLabel(status: AcceleratorDiagnosticsSummary['status']): s
     default:
       return '✗ PROBE FAILED'
   }
+}
+
+function getAcceleratorLabelForIssue(issue: AcceleratorDiagnosticsSummary['issue']): string {
+  if (issue === 'rocm_ready') {
+    return '✓ ROCM GPU READY'
+  }
+  return getAcceleratorLabel(issue === 'ready' ? 'ready' : 'error')
 }
 
 function getAcceleratorGuidance(
@@ -471,6 +484,16 @@ function getAcceleratorGuidance(
           { label: 'Verify Torch Runtime', command: commands.verifyTorch }
         ]
       }
+    case 'rocm_ready':
+      return {
+        title: 'AMD ROCm GPU Detected',
+        body: 'PyTorch has detected your AMD GPU via ROCm. NAM-BOT can use this AMD GPU for training acceleration. Your environment is correctly configured for ROCm-based training.',
+        setupSteps,
+        note: 'You are ready to train with AMD GPU acceleration. If a training run still falls back to CPU, check the job logs to see whether Lightning changes the accelerator decision at runtime.',
+        steps: [
+          { label: 'Verify ROCm PyTorch', command: buildPythonInlineCommand(settings, "import torch; print('CUDA Available:', torch.cuda.is_available()); print('HIP Version:', torch.version.hip)") }
+        ]
+      }
     case 'probe_launch_failed':
     case 'probe_payload_missing':
     case 'probe_payload_malformed':
@@ -531,7 +554,8 @@ function buildDiagnosticsExportPayload(
       verifyNam: commands.verifyNam,
       reinstallNam: commands.reinstallNam,
       reinstallTorchCuda: commands.reinstallTorchCuda,
-      reinstallTorchDefault: commands.reinstallTorchDefault
+      reinstallTorchDefault: commands.reinstallTorchDefault,
+      verifyRocm: commands.verifyRocm
     }
   }
 }
@@ -568,6 +592,7 @@ function buildAiTroubleshootingPrompt(
         `- Torch import OK: ${formatMaybeBoolean(acceleratorDiagnostics.torchImportOk)}`,
         `- Torch version: ${formatMaybeText(acceleratorDiagnostics.torchVersion, 'Not reported')}`,
         `- Torch CUDA build: ${formatMaybeText(acceleratorDiagnostics.torchCudaVersion, 'CPU-only or not reported')}`,
+        `- ROCm HIP version: ${formatMaybeText(acceleratorDiagnostics.hipVersion, 'Not reported')}`,
         `- CUDA available: ${formatMaybeBoolean(acceleratorDiagnostics.cudaAvailable)}`,
         `- CUDA device count: ${acceleratorDiagnostics.cudaDeviceCount != null ? String(acceleratorDiagnostics.cudaDeviceCount) : 'Unknown'}`,
         `- Primary device: ${formatMaybeText(acceleratorDiagnostics.deviceName, 'Not reported')}`,
@@ -610,6 +635,7 @@ function buildAiTroubleshootingPrompt(
     `- Verify Python target: ${commands.verifyPython}`,
     `- Verify torch: ${commands.verifyTorch}`,
     `- Verify NAM: ${commands.verifyNam}`,
+    `- Verify ROCm: ${commands.verifyRocm}`,
     `- Reinstall NAM: ${commands.reinstallNam}`,
     `- Reinstall torch default: ${commands.reinstallTorchDefault}`,
     `- Reinstall torch CUDA: ${commands.reinstallTorchCuda}`,
@@ -784,7 +810,7 @@ export default function Diagnostics() {
                   marginBottom: '10px'
                 }}
               >
-                {getAcceleratorLabel(acceleratorDiagnostics.status)}
+                {getAcceleratorLabelForIssue(acceleratorDiagnostics.issue)}
               </p>
               <p style={{ color: 'var(--text-ash)', fontSize: '18px', marginBottom: '8px' }}>{acceleratorDiagnostics.headline}</p>
               <p
@@ -826,6 +852,7 @@ export default function Diagnostics() {
                   <DiagnosticFact label="Torch import" value={formatMaybeBoolean(acceleratorDiagnostics.torchImportOk)} />
                   <DiagnosticFact label="Torch version" value={formatMaybeText(acceleratorDiagnostics.torchVersion, 'Not reported')} />
                   <DiagnosticFact label="Torch CUDA build" value={formatMaybeText(acceleratorDiagnostics.torchCudaVersion, 'CPU-only or not reported')} />
+                  <DiagnosticFact label="ROCm HIP version" value={formatMaybeText(acceleratorDiagnostics.hipVersion, 'Not reported')} />
                   <DiagnosticFact label="CUDA available" value={formatMaybeBoolean(acceleratorDiagnostics.cudaAvailable)} />
                   <DiagnosticFact
                     label="CUDA device count"
