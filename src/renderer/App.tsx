@@ -59,14 +59,21 @@ function getAcceleratorSummary(acceleratorDiagnostics: AcceleratorDiagnosticsSum
 
   switch (acceleratorDiagnostics.status) {
     case 'ready':
+      if (acceleratorDiagnostics.issue === 'rocm_ready') {
+        return {
+          label: acceleratorDiagnostics.deviceName ? `AMD GPU: ${acceleratorDiagnostics.deviceName}` : 'AMD GPU ready',
+          detail: acceleratorDiagnostics.detail,
+          color: 'var(--neon-green)'
+        }
+      }
       return {
-        label: acceleratorDiagnostics.deviceName ? `GPU: ${acceleratorDiagnostics.deviceName}` : 'GPU ready',
+        label: acceleratorDiagnostics.deviceName ? `NVIDIA GPU: ${acceleratorDiagnostics.deviceName}` : 'NVIDIA GPU ready',
         detail: acceleratorDiagnostics.detail,
         color: 'var(--neon-green)'
       }
     case 'advisory':
       return {
-        label: 'CUDA seen, check Lightning',
+        label: 'GPU seen, check Lightning',
         detail: acceleratorDiagnostics.detail,
         color: 'var(--neon-cyan)'
       }

@@ -353,7 +353,7 @@ export default function Help() {
             NAM-BOT validates the backend automatically on startup. You can always go to <strong>Diagnostics</strong> and click <strong>Re-check</strong> to inspect both backend readiness and GPU visibility.
           </p>
           <p style={{ color: 'var(--text-steel)', fontSize: '13px', marginTop: '8px' }}>
-            On Windows, GPU diagnostics mostly focus on CUDA and NVIDIA visibility. On Apple Silicon, the same screen also reports whether PyTorch can see <strong>MPS</strong>.
+            On Windows, GPU diagnostics check for both NVIDIA CUDA and AMD ROCm GPUs. On Apple Silicon, the same screen also reports whether PyTorch can see <strong>MPS</strong>.
           </p>
 
           <h4 style={{ fontFamily: 'var(--font-arcade)', color: 'var(--neon-cyan)', marginTop: '24px', marginBottom: '8px' }}>
