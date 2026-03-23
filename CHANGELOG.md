@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.2] - 2026-03-23
+
+### Added
+
+- NAM version check in Diagnostics screen showing installed vs latest GitHub release version
+- Automatic detection of installed NAM version from configured Python environment
+- GitHub releases integration fetching latest version from official NAM repository
+- Status badges for up-to-date, update available, and unable-to-check states
+- Copyable pip upgrade command when update is available
+- Version caching (24 hours) to avoid GitHub API rate limiting
+- Graceful handling of offline and rate-limited scenarios
+
+### Changed
+
+- Diagnostics screen now includes dedicated NAM Version Check panel between backend and accelerator diagnostics
+- Version check auto-loads with other diagnostics on screen open
+
+### Fixed
+
+- GitHub API endpoint corrected to use official `sdatkinson/neural-amp-modeler` repository instead of incorrect `nam-ml/model`
+- Version cache file location moved to app data directory to avoid permission errors
+
 ## [0.4.1] - 2026-03-20
 
 ### Added
