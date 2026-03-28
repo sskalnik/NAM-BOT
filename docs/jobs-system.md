@@ -209,6 +209,11 @@ Important runtime fields include:
 - resolved paths such as workspace, run directory, generated configs, logs, and published model output
 - terminal progress summaries, checkpoint summaries, device summaries, and user-facing messages
 
+For queued runs that share the same output root:
+
+- NAM-BOT waits for a freshly created timestamped run folder before it publishes the mirrored `.log` file into that folder
+- this keeps each queued job's log, ESR tracking, and final `.nam` artifact bound to the correct training run instead of reusing a folder from the previous job
+
 ### Job Status Values
 
 Jobs move through these statuses:

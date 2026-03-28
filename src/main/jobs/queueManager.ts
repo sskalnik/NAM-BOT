@@ -37,6 +37,8 @@ const ACTIVE_JOB_STATUSES: JobStatus[] = ['preparing', 'running', 'stopping']
 const QUEUED_JOB_STATUSES: JobStatus[] = ['queued', 'validating']
 const FINISHED_JOB_STATUSES: JobStatus[] = ['succeeded', 'failed', 'canceled']
 const NUMERIC_TOKEN_PATTERN = '[+-]?\\d+(?:\\.\\d+)?(?:e[+-]?\\d+)?'
+const RUN_DIRECTORY_LOOKBACK_MS = 1_000
+const RUN_ARTIFACT_LOOKBACK_MS = 15_000
 const BEST_CHECKPOINT_PATTERN = new RegExp(
   `^(\\d{4})_(\\d+)_(${NUMERIC_TOKEN_PATTERN})_(${NUMERIC_TOKEN_PATTERN})\\.ckpt$`,
   'i'
@@ -320,7 +322,7 @@ function findOutputRunDirectory(outputRootDir: string, startedAt: string | undef
     .map((entry) => join(outputRootDir, entry.name))
     .filter((dirPath) => {
       const name = dirPath.replace(/\\/g, '/').split('/').pop() ?? ''
-      return isTimestampDirectoryName(name) && getDirectoryCreatedAt(dirPath) >= startedAtMs - 15_000
+      return isTimestampDirectoryName(name) && getDirectoryCreatedAt(dirPath) >= startedAtMs - RUN_DIRECTORY_LOOKBACK_MS
     })
     .sort((left, right) => getDirectoryCreatedAt(right) - getDirectoryCreatedAt(left))
 
@@ -331,7 +333,7 @@ function findOutputRunDirectory(outputRootDir: string, startedAt: string | undef
   const directFiles = walkTrainingArtifacts(outputRootDir, 2).filter((filePath) => {
     const normalized = filePath.toLowerCase()
     return (
-      getFileModifiedAt(filePath) >= startedAtMs - 15_000 &&
+      getFileModifiedAt(filePath) >= startedAtMs - RUN_ARTIFACT_LOOKBACK_MS &&
       (normalized.endsWith('.ckpt') ||
         normalized.endsWith('.nam') ||
         normalized.endsWith('comparison.png') ||
