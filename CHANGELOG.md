@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.4-rc.1] - 2026-03-28
+
+### Added
+
+- Robust run-directory resolution for queued jobs, including fallback artifact-signature detection when timestamp ordering alone is ambiguous
+- Focused Vitest coverage for delayed and out-of-order output-folder creation during queue handoff
+
+### Changed
+
+- Jobs documentation now explains the full run-folder detection timeline between one task completing and the next task starting
+
+### Fixed
+
+- Queue handoff no longer attaches the next task's `.log`, ESR metadata, or final `.nam` naming data to the previous run folder when NAM output directories appear late
+
 ## [0.4.3] - 2026-03-28
 
 ### Added
