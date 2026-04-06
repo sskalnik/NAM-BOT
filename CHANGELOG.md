@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.5-rc.2] - 2026-04-06
+
+### Changed
+
+- Exported `.nam` files now also stamp a NAM-style `metadata.date` block at final write time for easier model sorting and provenance
+
+### Fixed
+
+- Exported `.nam` files now include additional NAM-BOT training metadata for the completed run, including `metadata.training.nam_bot.trained_epochs` and `metadata.training.nam_bot.preset_name`
+
 ## [0.4.5-rc.1] - 2026-04-06
 
 ### Added
