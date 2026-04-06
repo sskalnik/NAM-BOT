@@ -20,6 +20,7 @@ Use this skill to turn the current thread's completed repo changes into a clean 
 - Never push a version tag unless the user explicitly asks for it or explicitly confirms it in that thread.
 - `release.yml` publishes the Windows release assets from `v*` tags.
 - `release-macos.yml` is a separate manual workflow for attaching macOS beta assets to an existing tag.
+- `preview-release.yml` publishes rolling GitHub prerelease preview builds for pushes to `main`; those preview entries should not be treated as stable releases.
 - When a release resolves specific GitHub issues, close those associated issues after the relevant release steps are complete and leave a short shipped-in-version note.
 
 ## Required Files
@@ -27,7 +28,7 @@ Use this skill to turn the current thread's completed repo changes into a clean 
 - Update `CHANGELOG.md`.
 - Update `package.json`.
 - Update `package-lock.json`.
-- Update the version number in `About.tsx` (found in `src/renderer/features/about/About.tsx`).
+- Check whether the About screen uses a hardcoded version string. If it does, update it; if it already reads the runtime app version dynamically, no About version edit is needed.
 - If `AGENTS.md` contains a version in the title or release-specific instructions, keep it in sync.
 
 ## Workflow
@@ -46,6 +47,7 @@ Use this skill to turn the current thread's completed repo changes into a clean 
 12. After the tag decision is resolved, ask whether the maintainer also wants to release the macOS beta assets by running `release-macos.yml` against the same tag. Do not assume yes.
 13. If macOS beta assets are ready and the user confirms, run the manual macOS workflow against the already-published tag rather than creating a second tag.
 14. Close any associated GitHub issues that the release actually resolves, with a short comment noting the shipped version and the fix scope.
+15. Keep preview prerelease automation and stable tagged release automation distinct: preview builds may publish on `main`, but only `v*` tags should trigger the public Windows release flow.
 
 ## Changelog Notes
 

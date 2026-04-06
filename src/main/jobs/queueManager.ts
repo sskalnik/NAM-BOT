@@ -66,6 +66,11 @@ interface ParsedEpochProgress {
   totalBatches: number | null
 }
 
+interface ConfirmedNamTrainingMetadata {
+  validationEsr?: number
+  manualLatency?: number | null
+}
+
 function cloneJobSpec(jobSpec: JobSpec): JobSpec {
   return JSON.parse(JSON.stringify(jobSpec)) as JobSpec
 }
@@ -146,6 +151,39 @@ function stripTerminalControlSequences(value: string): string {
 function parseNumericToken(value: string): number | null {
   const parsed = Number(value)
   return Number.isFinite(parsed) ? parsed : null
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
+}
+
+function readConfirmedTrainingMetadata(runtime: JobRuntimeState): ConfirmedNamTrainingMetadata {
+  const trainingMetadata: ConfirmedNamTrainingMetadata = {}
+  const bestValidationEsr = runtime.checkpointSummary?.bestValidationEsr
+  if (bestValidationEsr != null) {
+    trainingMetadata.validationEsr = bestValidationEsr
+  }
+
+  const dataConfigPath = runtime.generatedConfigPaths?.dataConfig
+  if (!dataConfigPath || !existsSync(dataConfigPath)) {
+    return trainingMetadata
+  }
+
+  try {
+    const parsed = JSON.parse(readFileSync(dataConfigPath, 'utf-8')) as unknown
+    if (!isRecord(parsed) || !isRecord(parsed.common)) {
+      return trainingMetadata
+    }
+
+    const delay = parsed.common.delay
+    if (typeof delay === 'number' && Number.isFinite(delay) && delay !== 0) {
+      trainingMetadata.manualLatency = delay
+    }
+  } catch (error) {
+    log.warn('Failed to read generated data config for NAM training metadata:', error)
+  }
+
+  return trainingMetadata
 }
 
 function buildStructuredProgressLine(progress: JobTerminalProgress): string | null {
@@ -679,7 +717,11 @@ export class QueueManager extends EventEmitter {
     }
 
     const metadataPatch = buildNamMetadataPatch(runtime.frozenJob.metadata)
-    if (Object.keys(metadataPatch).length === 0) {
+    const confirmedTrainingMetadata = readConfirmedTrainingMetadata(runtime)
+    const hasValidationEsr = confirmedTrainingMetadata.validationEsr != null
+    const hasManualLatency = Object.prototype.hasOwnProperty.call(confirmedTrainingMetadata, 'manualLatency')
+
+    if (Object.keys(metadataPatch).length === 0 && !hasValidationEsr && !hasManualLatency) {
       return
     }
 
@@ -688,9 +730,39 @@ export class QueueManager extends EventEmitter {
       const currentMetadata = typeof parsed.metadata === 'object' && parsed.metadata !== null
         ? parsed.metadata as Record<string, unknown>
         : {}
+      const currentTraining = isRecord(currentMetadata.training)
+        ? currentMetadata.training
+        : {}
+      const currentTrainingData = isRecord(currentTraining.data)
+        ? currentTraining.data
+        : {}
+      const currentTrainingLatency = isRecord(currentTrainingData.latency)
+        ? currentTrainingData.latency
+        : {}
+
+      let nextTraining: Record<string, unknown> | null = null
+      if (hasValidationEsr || hasManualLatency || Object.keys(currentTraining).length > 0) {
+        nextTraining = { ...currentTraining }
+
+        if (hasValidationEsr) {
+          nextTraining.validation_esr = confirmedTrainingMetadata.validationEsr
+        }
+
+        if (hasManualLatency) {
+          nextTraining.data = {
+            ...currentTrainingData,
+            latency: {
+              ...currentTrainingLatency,
+              manual: confirmedTrainingMetadata.manualLatency ?? null
+            }
+          }
+        }
+      }
+
       parsed.metadata = {
         ...currentMetadata,
-        ...metadataPatch
+        ...metadataPatch,
+        ...(nextTraining ? { training: nextTraining } : {})
       }
       writeFileSync(modelPath, JSON.stringify(parsed, null, 2), 'utf-8')
     } catch (error) {

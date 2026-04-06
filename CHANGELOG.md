@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.5-rc.1] - 2026-04-06
+
+### Added
+
+- Pushes to `main` now publish GitHub prerelease preview builds for Windows and macOS so testers can download fresh binaries from the Releases page without replacing the latest stable tagged release
+- Preview prerelease automation now keeps only the newest ten `main` push builds so the Releases page stays useful instead of filling indefinitely with old test builds
+
+### Changed
+
+- Jobs docs now note that exported `.nam` files keep confirmed training metadata NAM-BOT can derive after a successful run
+
+### Fixed
+
+- Exported `.nam` files now write confirmed training metadata back into the final model, including final validation ESR and non-zero manual latency values when available
+
 ## [0.4.4] - 2026-03-28
 
 ### Added
